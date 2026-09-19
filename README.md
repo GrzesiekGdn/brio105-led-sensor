@@ -62,9 +62,11 @@ the design is built on a real mesh of the camera, not on guesswork.
    `(X=-15.8, Y=31.0)`, and the front/back faces around the LED are genuinely flat and
    parallel, ~17.9 mm apart. Those coordinates are what the `.scad` files are built from.
 5. **Cross-checked against the physical camera** with a tape measure — bezel diameter, LED
-   offset from the lens, housing depth. The mesh numbers and the hand measurements agree.
+   offset from the lens, housing depth. The mesh numbers and the hand measurements agree —
+   except the first housing-depth reading, which came out about 1 mm short (see
+   [Clip versions](#-clip-versions)).
 
-You can see the fit yourself: open [brio105-sensor-clip.scad](brio105-sensor-clip.scad) in
+You can see the fit yourself: open [brio105-sensor-clip-v1.2.scad](brio105-sensor-clip-v1.2.scad) in
 OpenSCAD with `show_reference = true` and the reference mesh is `import()`-ed in ghost mode,
 in the same coordinate frame, with the clip sitting on it.
 
@@ -82,10 +84,12 @@ and mould, but this has **not** been confirmed. Check a printed part against you
 
 | File | What it is |
 |------|-----------|
-| `brio105-sensor-clip.scad` | Spring clip ("hairpin" style) that grips the flat front/back faces beside the LED. Front and back are parallel here, so it clamps by flexing, not by hooking a corner. |
-| `brio105-sensor-clip.stl` / `.3mf` | Exported, ready to slice |
+| `brio105-sensor-clip-v1.2.scad` / `.stl` | **Latest.** Spring clip ("hairpin" style) that grips the flat front/back faces beside the LED. Front and back are parallel here, so it clamps by flexing, not by hooking a corner. |
+| `brio105-sensor-clip-v1.1.scad` / `.stl` | Earlier version, to be test-fitted against v1.2 — see [Clip versions](#-clip-versions) below |
+| `brio105-sensor-clip-v1.0.scad` / `.stl` | First version, kept for comparison |
 | `brio105-sensor-pod.scad` | Alternative attachment: a magnetic sensor pod plus a stick-on anchor. Holds the TEPT4400 and acts as the light shroud. Rotationally keyed so it can only re-attach the right way round. |
 | `reference/` | The STL meshes extracted from Logitech's AR asset (reference only — not printable parts) |
+| `photos/` | Tape-measure photo of the housing depth that v1.2's fit is based on |
 
 **Sensor:** TEPT4400 phototransistor. **Print:** matte black PETG or ABS — glossy filament
 reflects stray light down the tunnel and defeats the shroud. Per-part print notes are in each
@@ -93,10 +97,45 @@ reflects stray light down the tunnel and defeats the shroud. Per-part print note
 
 ---
 
+## 🧬 Clip versions
+
+All three share the same coordinate frame, lens and LED positions, and TEPT4400 bore, so
+they are directly comparable in OpenSCAD.
+
+> **Not yet tested.** Prints of v1.1 and v1.2 have been ordered for a test fit on the real
+> Brio 105. Until they arrive and have been tried, neither is confirmed — this section will
+> name the one that fits best.
+
+| Version | Relaxed jaw gap | What changed |
+|---|---|---|
+| **v1.0** — proposed by Claude | 17.3 mm | First design, built on the reference mesh: 17.9 mm housing minus 0.6 mm interference. 12 mm tall jaws. |
+| **v1.1** — revised with ChatGPT | 17.3 mm | Jaws raised to 14 mm. Fit rebased on a tape measurement of the real camera: 17.0 mm plus 0.3 mm clearance. Same gap as v1.0, opposite reasoning — v1.0 meant it to grip, v1.1 to slide on freely. |
+| **v1.2** — also by Claude | 16.2 mm | Spring redesigned so the fit no longer depends on the exact housing thickness. |
+
+**Why v1.2 exists.** v1.0 and v1.1 are geometrically nearly the same part, and share two
+problems:
+
+- **The spring was not a spring.** The back jaw wrapped the camera's rounded end, which left
+  the "bridge" as a solid block and put all the flex in a stiff 2.5 mm jaw (~48 N/mm). A
+  ±0.5 mm error in housing thickness flipped it between *cracks on fitting* and *falls off*.
+  v1.2 uses a flat back jaw and makes a thin 1.5 mm bridge the flexure (~3.3 N/mm), so it
+  holds across the whole plausible range of 17.0–18.6 mm without over-stressing.
+- **The 17.0 mm reading was probably ~1 mm short.** The tape's end hook has about 1 mm of
+  slide in its rivet slot. Measured off the photo in `photos/`, the housing is ~18.2 mm —
+  consistent with the reference mesh's 17.86 mm.
+
+v1.2 also moves the jaw's near edge 0.6 mm back from the lens rim (v1.0/v1.1 sat just over
+it), lets only contact ribs touch the housing, and adds a 5 × 3 mm funnel in front of the
+sensor, so the LED can be off its assumed position by ±2 mm along the bar and ±1.5 mm
+vertically and still be seen.
+
+---
+
 ## 🗺️ Roadmap
 
 - [x] **1. Reference geometry** — extract and measure the camera model
-- [ ] **2. Clip** — print, test-fit on the real camera, dial in the spring interference
+- [ ] **2. Clip** — prints of v1.1 and v1.2 ordered; test-fit both on the real camera, keep
+      the better one, dial in the spring interference
 - [ ] **3. Phototransistor** — mount the TEPT4400 in the clip/pod, wire it to an Arduino,
       calibrate the threshold that separates "LED on" from ambient light
 - [ ] **4. Software** — firmware that debounces the reading and sends the state to
