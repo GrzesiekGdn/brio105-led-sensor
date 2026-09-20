@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="400" color="#1A1F24" viewBox="0 0 520 400" role="img" aria-label="Schematic: 3V3 feeds the phototransistor's collector through the cable's red wire; its emitter returns through the black wire to the junction with a 10 kilohm resistor to ground; that junction is wired to pin A0. More light means more current and a higher voltage at A0."><style>text{font-family:"Atkinson Hyperlegible",Helvetica,Arial,"Liberation Sans",sans-serif}.m{font-family:"JetBrains Mono","DejaVu Sans Mono",Menlo,Consolas,monospace}</style><rect width="520" height="400" rx="14" fill="#FFFFFF"/>
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+        <marker id="ahs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#C28A00"/></marker>
+      </defs>
+      <!-- current arrow -->
+      <line x1="56" y1="70" x2="56" y2="344" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 5" marker-end="url(#ah)" opacity=".7"/>
+      <text x="56" y="56" font-size="13" text-anchor="middle" fill="currentColor">current</text>
+      <text x="68" y="236" font-size="12" fill="#56606A">grows</text>
+      <text x="68" y="252" font-size="12" fill="#56606A">with light</text>
+
+      <!-- 3V3 -->
+      <line x1="180" y1="40" x2="220" y2="40" stroke="#CF3A2C" stroke-width="3"/>
+      <text x="170" y="45" font-size="15" font-weight="700" text-anchor="end" fill="#CF3A2C" class="m">3V3</text>
+      <line x1="200" y1="40" x2="200" y2="102" stroke="#CF3A2C" stroke-width="2.5"/>
+
+      <!-- the two wires crossing this box are the cable -->
+      <rect x="96" y="86" width="140" height="118" rx="10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="6 5" opacity=".55"/>
+      <text x="102" y="196" font-size="12" fill="#56606A">on the camera</text>
+      <!-- phototransistor -->
+      <circle cx="196" cy="140" r="32" fill="none" stroke="currentColor" stroke-width="2"/>
+      <line x1="184" y1="122" x2="184" y2="158" stroke="currentColor" stroke-width="3.5"/>
+      <polyline points="184,130 200,116 200,102" fill="none" stroke="#CF3A2C" stroke-width="2.5"/>
+      <polyline points="184,150 200,164 200,194" fill="none" stroke="#2A2F35" stroke-width="2.5"/>
+      <polygon points="199,163 190.3,160.7 195.6,154.7" fill="#2A2F35"/>
+      <line x1="118" y1="90" x2="156" y2="116" stroke="currentColor" stroke-width="1.6" marker-end="url(#ah)"/>
+      <line x1="110" y1="110" x2="148" y2="136" stroke="currentColor" stroke-width="1.6" marker-end="url(#ah)"/>
+      <text x="112" y="80" font-size="13" text-anchor="middle" fill="currentColor">light</text>
+      <text x="210" y="108" font-size="14" font-weight="700" fill="currentColor" class="m">C</text>
+      <text x="210" y="184" font-size="14" font-weight="700" fill="currentColor" class="m">E</text>
+      <text x="242" y="137" font-size="14" font-weight="700" fill="currentColor">TEPT4400</text>
+      <text x="242" y="155" font-size="12.5" fill="#56606A">phototransistor</text>
+
+      <!-- junction + signal -->
+      <line x1="200" y1="194" x2="200" y2="230" stroke="#2A2F35" stroke-width="2.5"/>
+      <line x1="200" y1="230" x2="200" y2="262" stroke="currentColor" stroke-width="2"/>
+      <line x1="200" y1="230" x2="392" y2="230" stroke="#C28A00" stroke-width="3" marker-end="url(#ahs)"/>
+      <circle cx="200" cy="230" r="5.5" fill="#C28A00"/>
+      <text x="296" y="218" font-size="12.5" text-anchor="middle" fill="#56606A">A0 reads this voltage</text>
+      <text x="402" y="235" font-size="15" font-weight="700" fill="#855C00" class="m">A0 · D0</text>
+
+      <!-- resistor, IEC box -->
+      <rect x="188" y="262" width="24" height="64" fill="none" stroke="currentColor" stroke-width="2"/>
+      <text x="224" y="292" font-size="14" font-weight="700" fill="currentColor">10 kΩ</text>
+      <text x="224" y="309" font-size="12.5" fill="#56606A">resistor</text>
+      <line x1="200" y1="326" x2="200" y2="360" stroke="#2A2F35" stroke-width="2.5"/>
+
+      <!-- GND -->
+      <line x1="180" y1="360" x2="220" y2="360" stroke="#2A2F35" stroke-width="3"/>
+      <line x1="187" y1="368" x2="213" y2="368" stroke="#2A2F35" stroke-width="3"/>
+      <line x1="194" y1="376" x2="206" y2="376" stroke="#2A2F35" stroke-width="3"/>
+      <text x="170" y="373" font-size="15" font-weight="700" text-anchor="end" fill="#2A2F35" class="m">GND</text>
+    </svg>

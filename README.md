@@ -53,7 +53,7 @@ the design is built on a real mesh of the camera, not on guesswork.
    (`trimesh`, `pygltflib`, Blender, assimp — none installable), so the container was
    unpacked directly with stdlib Python `struct`/`json`: read the glTF chunk table, walk the
    accessors/buffer views, pull the vertex and index arrays out of the binary chunk, and
-   write the meshes back out as STL. Those exports are kept in [reference/](reference/):
+   write the meshes back out as STL. Those exports are kept in [hardware/reference/](hardware/reference/):
    - `brio100-camera-head.stl` — the camera body itself
    - `brio100-monitor-clip.stl` — the monitor hanger, kept for context
 4. **The mesh was measured by rasterization.** Again with no CAD library available, the STL
@@ -66,7 +66,7 @@ the design is built on a real mesh of the camera, not on guesswork.
    except the first housing-depth reading, which came out about 1 mm short (see
    [Clip versions](#-clip-versions)).
 
-You can see the fit yourself: open [brio105-sensor-clip-v1.2.scad](brio105-sensor-clip-v1.2.scad) in
+You can see the fit yourself: open [hardware/clip/brio105-sensor-clip-v1.2.scad](hardware/clip/brio105-sensor-clip-v1.2.scad) in
 OpenSCAD with `show_reference = true` and the reference mesh is `import()`-ed in ghost mode,
 in the same coordinate frame, with the clip sitting on it.
 
@@ -84,12 +84,12 @@ and mould, but this has **not** been confirmed. Check a printed part against you
 
 | File | What it is |
 |------|-----------|
-| `brio105-sensor-clip-v1.2.scad` / `.stl` | **Latest.** Spring clip ("hairpin" style) that grips the flat front/back faces beside the LED. Front and back are parallel here, so it clamps by flexing, not by hooking a corner. |
-| `brio105-sensor-clip-v1.1.scad` / `.stl` | Earlier version, to be test-fitted against v1.2 — see [Clip versions](#-clip-versions) below |
-| `brio105-sensor-clip-v1.0.scad` / `.stl` | First version, kept for comparison |
-| `brio105-sensor-pod.scad` | Alternative attachment: a magnetic sensor pod plus a stick-on anchor. Holds the TEPT4400 and acts as the light shroud. Rotationally keyed so it can only re-attach the right way round. |
-| `reference/` | The STL meshes extracted from Logitech's AR asset (reference only — not printable parts) |
-| `photos/` | Tape-measure photo of the housing depth that v1.2's fit is based on |
+| `hardware/clip/` | The spring clip ("hairpin" style) that grips the flat front/back faces beside the LED — v1.2 (latest), v1.1 and v1.0, each `.scad` + `.stl`, plus the tape-measure photo the fit is based on. See its [README](hardware/clip/README.md) |
+| `hardware/enclosure/` | Desk enclosure for the Seeed XIAO ESP32-C6 — snap-together tray and lid, holding the board, the 10k load resistor and the sensor-cable junction. Tray and lid as separate STLs; `part = "both"` in the `.scad` puts them on one plate. Also holds the XIAO reference model, `include`-ed as a ghost preview. See its [README](hardware/enclosure/README.md) |
+| `hardware/pod/` | Alternative attachment: a magnetic sensor pod plus a stick-on anchor. Holds the TEPT4400 and acts as the light shroud. Rotationally keyed so it can only re-attach the right way round. |
+| `hardware/reference/` | The STL meshes extracted from Logitech's AR asset (reference only — not printable parts) |
+| `hardware/wiring/` | [Wiring and first tests](hardware/wiring/README.md) — the circuit, the two wiring layouts and the no-solder tests for the board, with the drawings in `hardware/wiring/img/` |
+| `firmware/` | [Toolchain and tests](firmware/README.md) — what to install, how to run the three board tests, and where the Arduino functions come from |
 
 **Sensor:** TEPT4400 phototransistor. **Print:** matte black PETG or ABS — glossy filament
 reflects stray light down the tunnel and defeats the shroud. Per-part print notes are in each
@@ -99,35 +99,27 @@ reflects stray light down the tunnel and defeats the shroud. Per-part print note
 
 ## 🧬 Clip versions
 
-All three share the same coordinate frame, lens and LED positions, and TEPT4400 bore, so
-they are directly comparable in OpenSCAD.
+Three versions live in [hardware/clip/](hardware/clip/README.md). They are geometrically
+close, but they reach their fit in different ways, and v1.2 rebuilt the spring so the grip no
+longer depends on the exact housing thickness — the earlier two flipped between *cracks on
+fitting* and *falls off* with half a millimetre of error.
 
-> **Not yet tested.** Prints of v1.1 and v1.2 have been ordered for a test fit on the real
-> Brio 105. Until they arrive and have been tried, neither is confirmed — this section will
-> name the one that fits best.
+Prints of v1.1 and v1.2 are on order for a test fit; neither is confirmed yet. The clip's own
+README has the full comparison and the print orientation, which matters more than the
+material on this part.
 
-| Version | Relaxed jaw gap | What changed |
-|---|---|---|
-| **v1.0** — proposed by Claude | 17.3 mm | First design, built on the reference mesh: 17.9 mm housing minus 0.6 mm interference. 12 mm tall jaws. |
-| **v1.1** — revised with ChatGPT | 17.3 mm | Jaws raised to 14 mm. Fit rebased on a tape measurement of the real camera: 17.0 mm plus 0.3 mm clearance. Same gap as v1.0, opposite reasoning — v1.0 meant it to grip, v1.1 to slide on freely. |
-| **v1.2** — also by Claude | 16.2 mm | Spring redesigned so the fit no longer depends on the exact housing thickness. |
+---
 
-**Why v1.2 exists.** v1.0 and v1.1 are geometrically nearly the same part, and share two
-problems:
+## 🧰 Controller enclosure
 
-- **The spring was not a spring.** The back jaw wrapped the camera's rounded end, which left
-  the "bridge" as a solid block and put all the flex in a stiff 2.5 mm jaw (~48 N/mm). A
-  ±0.5 mm error in housing thickness flipped it between *cracks on fitting* and *falls off*.
-  v1.2 uses a flat back jaw and makes a thin 1.5 mm bridge the flexure (~3.3 N/mm), so it
-  holds across the whole plausible range of 17.0–18.6 mm without over-stressing.
-- **The 17.0 mm reading was probably ~1 mm short.** The tape's end hook has about 1 mm of
-  slide in its rivet slot. Measured off the photo in `photos/`, the housing is ~18.2 mm —
-  consistent with the reference mesh's 17.86 mm.
+The clip holds the phototransistor on the camera; the other end of the cable lives in a
+free-standing desk box — a bare XIAO ESP32-C6, the 10k load resistor and the cable junction,
+with USB-C plugged in for power. Two snap-together printed parts, built on Seeed's own KiCad
+geometry rather than on a published drawing, since their wiki and datasheet disagree about the
+board size.
 
-v1.2 also moves the jaw's near edge 0.6 mm back from the lens rim (v1.0/v1.1 sat just over
-it), lets only contact ribs touch the housing, and adds a 5 × 3 mm funnel in front of the
-sensor, so the LED can be off its assumed position by ±2 mm along the bar and ±1.5 mm
-vertically and still be seen.
+See [hardware/enclosure/](hardware/enclosure/README.md), and
+[hardware/wiring/](hardware/wiring/README.md) for what goes inside it.
 
 ---
 
@@ -136,11 +128,14 @@ vertically and still be seen.
 - [x] **1. Reference geometry** — extract and measure the camera model
 - [ ] **2. Clip** — prints of v1.1 and v1.2 ordered; test-fit both on the real camera, keep
       the better one, dial in the spring interference
-- [ ] **3. Phototransistor** — mount the TEPT4400 in the clip/pod, wire it to an Arduino,
+- [ ] **3. Phototransistor** — mount the TEPT4400 in the clip/pod, wire it to a Seeed XIAO
+      ESP32-C6 ([wiring and first tests](hardware/wiring/README.md)) in its
+      [enclosure](#-controller-enclosure),
       calibrate the threshold that separates "LED on" from ambient light
 - [ ] **4. Software** — firmware that debounces the reading and sends the state to
-      [Home Assistant](https://www.home-assistant.io/) (HTTP webhook or MQTT), so it can drive
-      an automation — a busy light, a lamp, a presence flag
+      [Home Assistant](https://www.home-assistant.io/) over Zigbee (built into the XIAO ESP32-C6)
+      or an HTTP webhook / MQTT, so it can drive an automation: a busy light, a lamp, a
+      presence flag
 
 ---
 
@@ -173,6 +168,6 @@ Copyright © 2026 Grzegorz Danowski. Two licenses, one per medium:
 | **Hardware designs** — `.scad`, `.stl`, `.3mf` | [CC-BY-SA 4.0](LICENSE) | Remix and sell them freely, including commercially — but credit this project and release your modified designs under the same license. |
 | **Software** — future Arduino firmware and tooling | [MIT](LICENSE-CODE) | Do anything you like, just keep the copyright notice. |
 
-The meshes in [reference/](reference/) are **not covered by either** — they are extracted from
+The meshes in [hardware/reference/](hardware/reference/) are **not covered by either** — they are extracted from
 Logitech's own published AR asset and remain Logitech's. They are included solely as a
 dimensional reference for checking fit, and are not printable parts.

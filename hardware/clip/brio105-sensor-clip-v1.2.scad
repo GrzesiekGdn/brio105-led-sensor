@@ -46,7 +46,7 @@
 // MEASUREMENT (what the housing thickness actually is)
 // ----------------------------------------------------
 // Three independent numbers:
-//   - reference/brio100-camera-head.stl, sampled in the Y=26..36 band:
+//   - ../reference/brio100-camera-head.stl, sampled in the Y=26..36 band:
 //     17.86mm, dead constant from X=-27 to X=-18.
 //   - photos/20260829_162636.jpg, measured off the image: the tape's 1mm
 //     graduations run 19.98 px/mm (fitted over the 30mm..2mm span), the
@@ -383,7 +383,7 @@ module end_clip() {
 end_clip();
 
 if (show_reference)
-    %import("reference/brio100-camera-head.stl");
+    %import("../reference/brio100-camera-head.stl");
 
 // ============================================================
 // PREVIEW (F5) vs RENDER (F6)

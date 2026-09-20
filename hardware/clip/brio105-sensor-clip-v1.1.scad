@@ -1,5 +1,5 @@
 // ============================================================
-// CORNER CLIP, rebuilt around REAL measured geometry
+// CORNER CLIP V1.1, rebuilt around REAL measured geometry
 // For: Logitech Brio 105, TEPT4400 phototransistor
 //
 // This replaces the earlier version of this file, which assumed a sharp
@@ -7,7 +7,7 @@
 // head is a rounded pill/pod shape, not a box. This version is built from
 // actual coordinates extracted from Logitech's own AR ("try in your room")
 // 3D model of the camera, cross-checked against the user's own tape-measure
-// readings of the physical unit. See reference/brio100-camera-head.stl
+// readings of the physical unit. See ../reference/brio100-camera-head.stl
 // - that file is the source mesh these numbers came from, and can be
 // import()-ed below (see show_reference) to visually check the fit in
 // OpenSCAD before printing.
@@ -31,7 +31,7 @@
 //   Z-buffer renderer, since no CAD libraries were available) and scanned
 //   for the lens's circular recess and for flat front/back regions:
 //     - Lens: a ~10mm-diameter circular dip in an otherwise flat front
-//       face, centered at (X=-15.8, Y=31.0), recessed to Z~45.5 vs the
+//       face, centered at (X=-15.8, Y=31.0), recessed to Z~45.5 vs. the
 //       surrounding flush front face at Z~47.6-47.7. Matches the user's
 //       own measurement of a 10mm bezel that "doesn't raise in any way".
 //     - LED: NOT visible as a distinct feature in the mesh (it's likely
@@ -59,9 +59,9 @@
 // clamp. Two jaw plates (front + back) are joined by a flexible bridge at
 // the tip-ward end. The bridge is the only flex point; you pry the two
 // free jaw tips apart, slip it over the housing, and let go. The inner gap
-// is deliberately undersized vs. the measured thickness (see `interference`)
-// so the plastic must flex open slightly on install - that's what generates
-// the clamping force. No sliding-on motion is required.
+// is based on the physical Brio 105 thickness plus a small installation
+// clearance. The bridge still provides the spring force when the clip is
+// opened by hand. No sliding-on motion is required.
 //
 // STILL UNVERIFIED - CHECK BEFORE PRINTING:
 //   - Confirm the Brio 100 housing really matches the Brio 105 (see note
@@ -69,14 +69,18 @@
 //   - Confirm the jaw's near edge (toward the lens) lands on the flush
 //     bezel rim and not on the recessed glass itself - the boundary
 //     between "flush rim" and "recessed glass" could only be pinned down
-//     to roughly X=-20.5 to -22 from the mesh data, and the jaw's near
-//     edge sits right at that boundary.
-//   - `interference` below (how much the relaxed jaw gap is undersized) is
-//     a first guess for a PLA/PETG spring bridge of this size - expect a
-//     print-test-adjust cycle to dial in real clamping force vs. how easy
-//     it is to open by hand.
+//     to roughly X=-20.5 to -22 from the mesh data, and the jaw's near edge
+//     sits right at that boundary.
+//   - `fit_clearance` below is a starting value for the relaxed jaw gap.
+//     The first print should be treated as a fit test, especially because
+//     the reference mesh is Brio 100 rather than Brio 105.
+//
+// V1.1 FIT BASIS:
+//   The Brio 100 reference mesh reports ~17.9mm in this region, but the
+//   physical Brio 105 was measured at ~17.0mm. Because the reference mesh
+//   is Brio 100 (not 105), the physical 17.0mm value is used for the clip
+//   gap; the reference mesh remains a shape/position reference only.
 // ============================================================
-
 $fn = 64;
 
 // ---- REAL measured geometry (mesh frame, mm - see notes above) ----
@@ -87,16 +91,28 @@ led_y   = 31.0;
 front_z = 47.7;    // flat front face at the LED (NOT the lens - lens itself is recessed ~2mm)
 back_z  = 29.8;    // flat back face - constant over the whole flat window
 
-measured_thickness = front_z - back_z;  // ~17.9mm
+reference_thickness = front_z - back_z;  // ~17.9mm in the Brio 100 reference mesh
+
+// Physical Brio 105 fit:
+// The photo measurement is approximately 17.0mm across the housing at the
+// LED area. This is deliberately kept separate from reference_thickness:
+// the reference mesh is Brio 100 and must not dictate the Brio 105 fit.
+camera_thickness = 17.0;
+fit_clearance    = 0.30;  // relaxed diametral clearance; tune after first print
+
+// Relaxed distance between the two inner jaw faces.
+// The clearance is positive: the clip is NOT intended to be preloaded while
+// sitting on the camera. Opening the jaws by hand creates the spring force.
+inner_gap = camera_thickness + fit_clearance;
 
 // ---- clip geometry (design choices, sized to the flat window above) ----
 // The flat window is NOT symmetric around the LED: the lens's recessed
 // glass starts around X=-20.5 (hard limit - must stay clear, or the clip
 // blocks the camera). On the tip side, the jaw PLATE is fine resting close
 // to the housing all the way past the taper (it stays a thin flat plate
-// that just follows the surface loosely, confirmed by sampling: real front
-// Z stays <=47.64 all the way to the tip at X=-34.76, vs. our flat contact
-// at 47.7 - always a hair clear, never colliding).
+// that just follows the surface loosely, confirmed by sampling: real
+// front Z stays <=47.64 all the way to the tip at X=-34.76, vs. our flat
+// contact at 47.7 - always a hair clear, never colliding).
 //
 // The BRIDGE is a different story: it is a SOLID block spanning the full
 // front-to-back thickness, not a thin plate - so it must not be placed
@@ -107,24 +123,20 @@ measured_thickness = front_z - back_z;  // ~17.9mm
 // The pod's mesh has ZERO vertices beyond X=-34.76 (confirmed empirically),
 // so the bridge is pushed out past that point, into genuinely empty space.
 near_margin    = 3.2;   // led_x -> jaw's lens-side edge (X=-20.9, ~0.4mm
-                        // clear of the lens dip at -20.5 - TIGHT, verify
-                        // against the imported reference mesh before print)
+                         // clear of the lens dip at -20.5 - TIGHT, verify
+                         // against the imported reference mesh before print)
 far_margin     = 11.0;  // led_x -> jaw's tip-side edge (X=-35.1), ~0.34mm
-                        // past the pod's true tip at X=-34.76 - the jaw
-                        // plate rides the taper the whole way, the bridge
-                        // only starts once the pod has actually ended
+                         // past the pod's true tip at X=-34.76 - the jaw
+                         // plate rides the taper the whole way, the bridge
+                         // only starts once the pod has actually ended
 jaw_thick      = 2.5;  // material thickness of each jaw plate
-jaw_height     = 12;   // along Y, centered on led_y
-interference   = 0.6;  // mm the relaxed inner gap is undersized vs. measured_thickness -
-                       // this is what makes the bridge flex and grip on install
+jaw_height     = 14;   // along Y, centered on led_y - slightly larger grip area
 bridge_thick   = 3;    // along X, the flex/spring wall at the tip-ward end
 corner_overlap = 0.4;  // forces real volumetric overlap where parts meet, so the CSG
-                       // union is a single valid manifold solid. Kept small (and within
-                       // the flat 46.07 cap of back_profile, X=-35.10..-34.70) so the
-                       // bridge's overlap zone doesn't reach into the fast-dropping part
-                       // of the taper, which is what caused the notch/step - see bridge()
-
-inner_gap = measured_thickness - interference;
+                        // union is a single valid manifold solid. Kept small (and within
+                        // the flat 46.07 cap of back_profile, X=-35.10..-34.70) so the
+                        // bridge's overlap zone doesn't reach into the fast-dropping part
+                        // of the taper, which is what caused the notch/step - see bridge()
 
 x_near = led_x + near_margin;  // toward the lens (open end)
 x_far  = led_x - far_margin;   // toward the tapered tip (bridge/closed end)
@@ -145,20 +157,19 @@ tept_body_d      = 3.35;  // worst-case max diameter of the straight-walled
                           // body shoulder (Ø3.2 +/-0.15), not just the tip
 tept_bore_d      = tept_body_d + 0.45;  // 3.8mm - real FDM-printable clearance
 tept_bore_depth  = 5.0;  // NOTE: the wide bore is a THROUGH hole, open at the
-                         // outer/tip end (see the boss cut below) - it does
-                         // not need to swallow the whole ~7mm rigid body, just
-                         // enough of the straight shoulder to grip it (5mm is
-                         // plenty). Bumping this to fully enclose the body was
-                         // tried first, but it pushes the whole boss further
-                         // forward by the same amount, which ate directly into
-                         // the lens-FOV clearance margin checked earlier
-                         // (alpha dropped from ~30 to ~25deg, below the
-                         // camera's own ~25.8deg half-FOV) - so depth is left
-                         // as-is and only the diameter is widened.
+                          // outer/tip end (see the boss cut below) - it does
+                          // not need to swallow the whole ~7mm rigid body, just
+                          // enough of the straight shoulder to grip it (5mm is
+                          // plenty). Bumping this to fully enclose the body was
+                          // tried first, but it pushes the whole boss further
+                          // forward by the same amount, which ate directly into
+                          // the lens-FOV clearance margin checked earlier
+                          // (alpha dropped from ~30 to ~25deg, below the
+                          // camera's own ~25.8deg half-FOV) - so depth is left
+                          // as-is and only the diameter is widened.
 tunnel_d         = 1.6;
 tunnel_len       = 2.5;
 pod_wall         = 1.2;  // thin - keeps the boss inside near_margin, see caveat below
-
 boss_r   = tept_bore_d/2 + pod_wall;
 boss_len = tept_bore_depth + tunnel_len;
 
@@ -175,15 +186,15 @@ show_reference = true;
 // whole length instead of floating in a growing gap.
 //
 // (Originally this carved the reference mesh directly via difference(),
-// which is the more "automatic" approach - but that mesh turned out not to
-// be watertight/manifold (1181 open boundary edges, likely from the AR
+// which is the more "automatic" approach - but that mesh turned out not
+// to be watertight/manifold (1181 open boundary edges, likely from the AR
 // export process), so CGAL can't boolean against it reliably. Sampling the
 // same mesh's raw vertex data in Python and hand-deriving a profile curve
 // sidesteps that, at the cost of needing to keep this table in sync if the
 // reference mesh is ever replaced.)
 //
 // Samples: min Z (= back surface) in the Y=25..37 band, every 1mm of X,
-// from reference/brio100-camera-head.stl:
+// from ../reference/brio100-camera-head.stl:
 back_profile = [
     [-35.10, 46.07],  // flat cap - no mesh exists past the true tip at X=-34.76,
     [-34.70, 46.07],  // so this just continues the last real sample
@@ -227,13 +238,10 @@ function miter_offset(pprev, pcur, pnext, thick) =
         blen = norm(b)
     )
     blen < 1e-6
-        ? pcur + thick * na   // near-antiparallel normals (a full U-turn),
-                              // fall back to plain single-segment offset
+        ? pcur + thick * na
         : let(bn = b / blen, cos_half = na * bn)
             pcur + (thick / cos_half) * bn;
 
-// One outer offset point per input point - endpoints just use their single
-// adjacent segment's normal directly (no miter needed / possible there).
 function outer_offsets(pts, thick) =
     let(n = len(pts))
     concat(
@@ -243,49 +251,6 @@ function outer_offsets(pts, thick) =
     );
 
 module back_jaw_contoured() {
-    // Constant-thickness shell: inner edge = real contour (contact face),
-    // outer edge = same contour offset by jaw_thick perpendicular to itself.
-    //
-    // FIRST attempt (flat outer baseline): only matched jaw_thick at the LED
-    // end - near the tip it left an ~19mm solid wedge instead of a thin
-    // 2.5mm prong ("Sigma vs C" bug).
-    //
-    // SECOND attempt (outer = [x, z - jaw_thick], a pure vertical shift):
-    // fixed the wedge, but a vertical shift only equals the TRUE
-    // perpendicular wall thickness where the contour is flat. Where the
-    // contour is steep (the dome curving down from the tip cap into the
-    // flat back wall), the true perpendicular thickness collapses - as low
-    // as 0.5mm against an intended 2.5mm, i.e. an unprintable/fragile wall -
-    // this is the thin spot that showed up in the preview of that revision.
-    //
-    // THIRD attempt: one combined polygon (inner contour + reversed
-    // per-segment BEVEL-offset outer contour, i.e. TWO outer vertices per
-    // joint, one per adjacent segment's normal). Gave the right thickness
-    // everywhere, but the resulting polygon - many joints, several
-    // near-collinear/duplicate points in the flat LED-end run - was too
-    // degenerate for CGAL: it rendered fine as a standalone extrusion, but
-    // silently failed ("ERROR: The given mesh is not closed! Unable to
-    // convert to CGAL_Nef_Polyhedron.") whenever unioned with the rest of
-    // the clip, and its geometry was dropped from the export with NO visible
-    // error in truncated console output.
-    //
-    // FOURTH attempt: rebuilt the shell as a union of many small pieces
-    // instead of one polygon - one quad prism per profile segment plus a
-    // triangular bevel-wedge prism at every interior vertex. This was
-    // manifold and complete (Simple: yes, full Z range in the STL), but the
-    // outer surface was visibly serrated in external STL viewers - CGAL
-    // wasn't fully fusing coplanar-adjacent quads across their shared side
-    // faces, leaving visible internal facets/seams down the length of the
-    // shell.
-    //
-    // FIX (this version): back to ONE polygon extruded ONCE, but with a
-    // MITER offset (single outer vertex per input vertex) instead of bevel
-    // (two outer vertices per joint). This is what the third attempt should
-    // have been - miter's simpler vertex layout dodges the degeneracies that
-    // tripped CGAL, and a single extrusion has one continuous outer skin, so
-    // there are no internal seams to render. Verified Simple: yes, no
-    // errors/warnings, full expected Z range in the exported STL, and clean
-    // smooth outer surface in preview.
     outer = outer_offsets(back_profile, jaw_thick);
     poly_pts = concat(
         back_profile,
@@ -301,30 +266,24 @@ module back_jaw_contoured() {
 // contoured shell at the tip end. Its bottom face used to sit at the old
 // flat-back-jaw baseline (back_z - jaw_thick = 27.3) - a leftover from
 // before back_jaw_contoured() became a thin contour-following shell. That
-// left the bridge ~22mm tall while the shell it meets is only ~2.5mm
-// thick, so the union had a ~10mm cliff at the seam (visible as the
-// notch/step that cuts across the real housing curve instead of
-// following it).
+// left the bridge ~22mm tall while the shell it meets is only ~2.5mm thick, so
+// the union had a ~10mm cliff at the seam (visible as the notch/step that
+// cuts across the real housing curve instead of following it).
 // Fix: size the bridge's bottom face to match the shell's outer face
 // right at x_far (the first back_profile sample), so the two meet flush.
-bridge_chamfer = 1.2;  // mm, leg length of the 45-degree cut on each outer corner -
-                       // small because the bridge itself is now only a few mm tall
-
+bridge_chamfer = 1.2;
 module bridge() {
-    x0 = x_far - bridge_thick;               // outer (far) face
-    x1 = x_far + corner_overlap;             // inner face, overlaps into the jaws
-    z0 = back_profile[0][1] - jaw_thick;     // bottom outer face - flush with the
-                                              // back jaw shell's outer face at x_far
-    z1 = back_z + inner_gap + jaw_thick;     // top outer face - matches front jaw
+    x0 = x_far - bridge_thick;
+    x1 = x_far + corner_overlap;
+    z0 = back_profile[0][1] - jaw_thick;
+    z1 = back_z + inner_gap + jaw_thick;
     difference() {
         translate([x0, y_lo, z0])
             cube([x1 - x0, jaw_height, z1 - z0]);
-        // top-outer corner
         translate([x0 - 1, y_lo - 1, z1 - bridge_chamfer])
             rotate([0, 45, 0])
                 translate([-bridge_chamfer, 0, -bridge_chamfer])
                     cube([bridge_chamfer * 2, jaw_height + 2, bridge_chamfer * 2]);
-        // bottom-outer corner
         translate([x0 - 1, y_lo - 1, z0 + bridge_chamfer])
             rotate([0, 45, 0])
                 translate([-bridge_chamfer, 0, -bridge_chamfer])
@@ -339,19 +298,13 @@ module end_clip() {
             translate([x_far, y_lo, back_z + inner_gap])
                 cube([engagement_len, jaw_height, jaw_thick]);
 
-            // back jaw - CONTOURED to the real back wall instead of a flat plate
-            // (see back_jaw_contoured() below): the back wall is only flat right
-            // at the LED, it curves away toward the tip, so a flat plate here
-            // would touch near the LED and then float in a growing gap for most
-            // of its length
+            // back jaw - CONTOURED to the real back wall
             back_jaw_contoured();
 
-            // bridge - the flex/spring point, joins front to back at the
-            // tip-ward end; overlaps into the jaws by corner_overlap
+            // bridge - the flex/spring point
             bridge();
 
-            // sensor boss - extra material at the LED position, since the
-            // jaw alone isn't deep enough to hold the TEPT4400
+            // sensor boss - extra material at the LED position
             translate([led_x, led_y, back_z + inner_gap])
                 cylinder(r = boss_r, h = boss_len);
         }
@@ -369,4 +322,4 @@ module end_clip() {
 end_clip();
 
 if (show_reference)
-    %import("reference/brio100-camera-head.stl");
+    %import("../reference/brio100-camera-head.stl");
